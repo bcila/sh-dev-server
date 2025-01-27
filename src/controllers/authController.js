@@ -13,7 +13,12 @@ const login = async (req, res) => {
 
   const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-  res.json({ token });
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',   // false for dev
+    sameSite: 'Strict',
+    maxAge: 3600000 // 1 hour
+  });
 };
 
 const getProfile = async (req, res) => {
