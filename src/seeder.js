@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Subscription = require('./models/Subscription');
 const Course = require('./models/Course');
@@ -23,10 +24,12 @@ const seedData = async () => {
   await Course.deleteMany();
   await Notification.deleteMany();
 
+  const hashedPassword = await bcrypt.hash('password', 10);
+
   const users = await User.insertMany([
-    { name: 'Admin User', email: 'admin@example.com', password: 'password', role: 'admin' },
-    { name: 'Trainer User', email: 'trainer@example.com', password: 'password', role: 'trainer' },
-    { name: 'Student User', email: 'student@example.com', password: 'password', role: 'student' },
+    { name: 'Admin User', email: 'admin@example.com', password: hashedPassword, role: 'admin' },
+    { name: 'Trainer User', email: 'trainer@example.com', password: hashedPassword, role: 'trainer' },
+    { name: 'Student User', email: 'student@example.com', password: hashedPassword, role: 'student' },
   ]);
 
   console.log('Users seeded:', users);
