@@ -1,108 +1,54 @@
-const Progress = require('../models/Progress');
-const Course = require('../models/Course');
+const progressService = require('../services/progressService');
 
-// Kullanıcının kurs ilerlemesini getir
 const getProgress = async (req, res) => {
   try {
-    const progress = await Progress.findOne({
-      user: req.user.id,
-      course: req.params.courseId
-    }).populate('course', 'title lessons');
-
-    if (!progress) {
-      return res.status(404).json({ message: 'Progress not found' });
-    }
-
+    const progress = await progressService.getUserProgress(req.user.id, req.params.courseId);
     res.json(progress);
   } catch (error) {
+    if (error.message === 'Progress not found') {
+      return res.status(404).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 };
 
-// Kullanıcının tüm kurs ilerlemelerini getir
 const getAllProgress = async (req, res) => {
   try {
-    const progresses = await Progress.find({ user: req.user.id })
-      .populate('course', 'title lessons')
-      .sort({ lastAccessed: -1 });
-
+    const progresses = await progressService.getAllUserProgress(req.user.id);
     res.json(progresses);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Dersi tamamlandı olarak işaretle
 const markLessonComplete = async (req, res) => {
-  const { courseId, lessonId } = req.params;
-
   try {
-    let progress = await Progress.findOne({ user: req.user.id, course: courseId });
-    const course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-
-    // Dersin kursa ait olduğunu kontrol et
-    const lessonExists = course.lessons.some(lesson => lesson._id.toString() === lessonId);
-    if (!lessonExists) {
-      return res.status(404).json({ message: 'Lesson not found in this course' });
-    }
-
-    // İlerleme kaydı yoksa oluştur
-    if (!progress) {
-      progress = new Progress({
-        user: req.user.id,
-        course: courseId,
-        completedLessons: [],
-        progress: 0
-      });
-    }
-
-    // Ders zaten tamamlanmışsa kontrol et
-    const lessonCompleted = progress.completedLessons.some(
-      lesson => lesson.lessonId.toString() === lessonId
+    const progress = await progressService.markLessonComplete(
+      req.user.id,
+      req.params.courseId,
+      req.params.lessonId
     );
-
-    if (!lessonCompleted) {
-      progress.completedLessons.push({ lessonId });
-      progress.progress = (progress.completedLessons.length / course.lessons.length) * 100;
-      progress.lastAccessed = new Date();
-      await progress.save();
-    }
-
     res.json(progress);
   } catch (error) {
+    if (error.message.includes('not found')) {
+      return res.status(404).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 };
 
-// Dersi tamamlanmamış olarak işaretle
 const markLessonIncomplete = async (req, res) => {
-  const { courseId, lessonId } = req.params;
-
   try {
-    const progress = await Progress.findOne({ user: req.user.id, course: courseId });
-    if (!progress) {
-      return res.status(404).json({ message: 'Progress not found' });
-    }
-
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-
-    progress.completedLessons = progress.completedLessons.filter(
-      lesson => lesson.lessonId.toString() !== lessonId
+    const progress = await progressService.markLessonIncomplete(
+      req.user.id,
+      req.params.courseId,
+      req.params.lessonId
     );
-    
-    progress.progress = (progress.completedLessons.length / course.lessons.length) * 100;
-    progress.lastAccessed = new Date();
-    
-    await progress.save();
     res.json(progress);
   } catch (error) {
+    if (error.message.includes('not found')) {
+      return res.status(404).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 };

@@ -4,7 +4,6 @@ const subscriptionController = require('../controllers/subscriptionController');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
-// Admin routes for subscription management
 router.get('/', authMiddleware, subscriptionController.getAllSubscriptions);
 router.post('/', authMiddleware, roleMiddleware(['admin']), subscriptionController.createSubscription);
 router.put('/:id', authMiddleware, roleMiddleware(['admin']), subscriptionController.updateSubscription);
