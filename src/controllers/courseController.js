@@ -1,8 +1,47 @@
-const courseService = require('../services/courseService');
+const CourseService = require('../services/courseService');
 
+// Public controllers (auth required)
 const getAllCourses = async (req, res) => {
   try {
-    const courses = await courseService.getAllCourses();
+    const courses = await CourseService.getAllPublicCourses();
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCourseById = async (req, res) => {
+  try {
+    const course = await CourseService.getCourseById(req.params.id);
+    res.json(course);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+// Student controllers
+const getEnrolledCourses = async (req, res) => {
+  try {
+    const courses = await CourseService.getEnrolledCourses(req.user.id);
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const enrollCourse = async (req, res) => {
+  try {
+    const course = await CourseService.enrollCourse(req.params.id, req.user.id);
+    res.json(course);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Teacher controllers
+const getTeachingCourses = async (req, res) => {
+  try {
+    const courses = await CourseService.getTeachingCourses(req.user.id);
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,40 +50,51 @@ const getAllCourses = async (req, res) => {
 
 const createCourse = async (req, res) => {
   try {
-    const course = await courseService.createCourse(req.body, req.user.id);
-    res.status(201).json({ message: 'Course created successfully', course });
+    const course = await CourseService.createCourse(req.body, req.user.id);
+    res.status(201).json(course);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-const updateCourse = async (req, res) => {
+const updateTeacherCourse = async (req, res) => {
   try {
-    const course = await courseService.updateCourse(req.params.id, req.body);
-    res.json({ message: 'Course updated successfully', course });
+    const course = await CourseService.updateTeacherCourse(req.params.id, req.body, req.user.id);
+    res.json(course);
   } catch (error) {
-    if (error.message === 'Course not found') {
-      return res.status(404).json({ message: error.message });
-    }
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-const deleteCourse = async (req, res) => {
+const deleteTeacherCourse = async (req, res) => {
   try {
-    await courseService.deleteCourse(req.params.id);
+    await CourseService.deleteTeacherCourse(req.params.id, req.user.id);
     res.json({ message: 'Course deleted successfully' });
   } catch (error) {
-    if (error.message === 'Course not found') {
-      return res.status(404).json({ message: error.message });
-    }
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Admin controllers
+const getAllCoursesAdmin = async (req, res) => {
+  try {
+    const courses = await CourseService.getAllCoursesAdmin();
+    res.json(courses);
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 module.exports = {
   getAllCourses,
+  getCourseById,
+  getEnrolledCourses,
+  enrollCourse,
+  getTeachingCourses,
   createCourse,
-  updateCourse,
-  deleteCourse
+  updateTeacherCourse,
+  deleteTeacherCourse,
+  getAllCoursesAdmin,
+  updateCourse: updateTeacherCourse,
+  deleteCourse: deleteTeacherCourse
 };
