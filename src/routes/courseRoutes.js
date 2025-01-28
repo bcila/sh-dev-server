@@ -5,9 +5,10 @@ const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
 
-router.get('/', authMiddleware, roleMiddleware(['admin']), courseController.getAllCoursesAdmin);
-router.post('/', authMiddleware, roleMiddleware(['admin']), courseController.createCourse);
-router.put('/:id', authMiddleware, roleMiddleware(['admin']), courseController.updateCourse);
-router.delete('/:id', authMiddleware, roleMiddleware(['admin']), courseController.deleteCourse);
+router.get('/admin/courses/', authMiddleware, roleMiddleware(['admin']), courseController.getAllCoursesAdmin);
+router.post('/admin/courses/', authMiddleware, roleMiddleware(['admin']), courseController.createCourse);
+router.put('/admin/courses/:id', authMiddleware, roleMiddleware(['admin']), courseController.updateCourse);
+router.delete('/admin/courses/:id', authMiddleware, roleMiddleware(['admin']), courseController.deleteCourse);
 
+router.get('/courses', authMiddleware, courseController.getAllCourses);
 module.exports = router;

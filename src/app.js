@@ -34,7 +34,7 @@ connectDB();
 // Route Middleware
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', userRoutes);
-app.use('/api/admin/courses', courseRoutes);
+app.use('/api', courseRoutes);
 app.use('/api/admin/subscriptions', subscriptionRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/notifications', notificationRoutes);
