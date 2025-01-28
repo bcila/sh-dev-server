@@ -3,13 +3,24 @@ const Course = require('../models/Course');
 
 class ProgressService {
   async getUserProgress(userId, courseId) {
-    const progress = await Progress.findOne({
+    let progress = await Progress.findOne({
       user: userId,
       course: courseId
     }).populate('course', 'title lessons');
 
     if (!progress) {
-      throw new Error('Progress not found');
+      const course = await Course.findById(courseId);
+      if (!course) {
+        throw new Error('Course not found');
+      }
+
+      progress = new Progress({
+        user: userId,
+        course: courseId,
+        completedLessons: [],
+        progress: 0
+      });
+      await progress.save();
     }
 
     return progress;
@@ -33,7 +44,6 @@ class ProgressService {
     }
 
     let progress = await Progress.findOne({ user: userId, course: courseId });
-
     if (!progress) {
       progress = new Progress({
         user: userId,
@@ -43,11 +53,7 @@ class ProgressService {
       });
     }
 
-    const lessonCompleted = progress.completedLessons.some(
-      lesson => lesson.lessonId.toString() === lessonId
-    );
-
-    if (!lessonCompleted) {
+    if (!progress.completedLessons.some(lesson => lesson.lessonId.toString() === lessonId)) {
       progress.completedLessons.push({ lessonId });
       progress.progress = (progress.completedLessons.length / course.lessons.length) * 100;
       progress.lastAccessed = new Date();
@@ -63,19 +69,16 @@ class ProgressService {
       throw new Error('Progress not found');
     }
 
-    const course = await Course.findById(courseId);
-    if (!course) {
-      throw new Error('Course not found');
-    }
-
     progress.completedLessons = progress.completedLessons.filter(
       lesson => lesson.lessonId.toString() !== lessonId
     );
-    
+
+    const course = await Course.findById(courseId);
     progress.progress = (progress.completedLessons.length / course.lessons.length) * 100;
     progress.lastAccessed = new Date();
-    
-    return await progress.save();
+    await progress.save();
+
+    return progress;
   }
 }
 

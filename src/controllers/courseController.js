@@ -1,4 +1,5 @@
 const CourseService = require('../services/courseService');
+const User = require('../models/User');
 
 // Public controllers (auth required)
 const getAllCourses = async (req, res) => {
@@ -85,6 +86,18 @@ const getAllCoursesAdmin = async (req, res) => {
   }
 };
 
+const getTeachers = async (req, res) => {
+  try {
+    const teachers = await User.find({ role: 'teacher' })
+      .select('_id name email')
+      .sort({ name: 1 });
+    
+    res.json(teachers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllCourses,
   getCourseById,
@@ -96,5 +109,6 @@ module.exports = {
   deleteTeacherCourse,
   getAllCoursesAdmin,
   updateCourse: updateTeacherCourse,
-  deleteCourse: deleteTeacherCourse
+  deleteCourse: deleteTeacherCourse,
+  getTeachers
 };

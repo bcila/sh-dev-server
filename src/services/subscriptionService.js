@@ -2,49 +2,30 @@ const Subscription = require('../models/Subscription');
 
 class SubscriptionService {
   async getAllSubscriptions() {
-    return await Subscription.find({ active: true });
+    return await Subscription.find().sort({ createdAt: -1 });
   }
 
   async createSubscription(subscriptionData) {
-    if (!this.isValidDuration(subscriptionData.duration)) {
-      throw new Error('Invalid duration format');
-    }
-
-    const subscription = new Subscription({
-      ...subscriptionData,
-      features: subscriptionData.features || []
-    });
-
+    const subscription = new Subscription(subscriptionData);
     return await subscription.save();
   }
 
-  async updateSubscription(subscriptionId, subscriptionData) {
-    const subscription = await Subscription.findById(subscriptionId);
+  async updateSubscription(id, subscriptionData) {
+    const subscription = await Subscription.findById(id);
     if (!subscription) {
       throw new Error('Subscription plan not found');
     }
-
-    if (subscriptionData.duration && !this.isValidDuration(subscriptionData.duration)) {
-      throw new Error('Invalid duration format');
-    }
-
-    subscription.name = subscriptionData.name || subscription.name;
-    subscription.price = subscriptionData.price || subscription.price;
-    subscription.duration = subscriptionData.duration || subscription.duration;
-    subscription.features = subscriptionData.features || subscription.features;
-    subscription.active = subscriptionData.active !== undefined ? subscriptionData.active : subscription.active;
-
+    Object.assign(subscription, subscriptionData);
     return await subscription.save();
   }
 
-  async deleteSubscription(subscriptionId) {
-    const subscription = await Subscription.findById(subscriptionId);
+  async deleteSubscription(id) {
+    const subscription = await Subscription.findById(id);
     if (!subscription) {
       throw new Error('Subscription plan not found');
     }
-
-    subscription.active = false;
-    return await subscription.save();
+    await subscription.deleteOne();
+    return subscription;
   }
 
   isValidDuration(duration) {

@@ -2,37 +2,45 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 
 class NotificationService {
-  async getNotifications(userId) {
-    return await Notification.find({ user: userId }).sort({ createdAt: -1 });
+  async getUserNotifications(userId) {
+    return await Notification.find({ user: userId })
+      .sort({ createdAt: -1 });
   }
 
-  async createNotification(title, message, userId) {
-    const user = await User.findById(userId);
-    if (!user) throw new Error('User not found');
-
-    const notification = new Notification({
-      title,
-      message,
+  async markAsRead(notificationId, userId) {
+    const notification = await Notification.findOne({
+      _id: notificationId,
       user: userId
     });
 
-    return await notification.save();
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
+
+    notification.read = true;
+    await notification.save();
+    return notification;
   }
 
-  async markAsRead(notificationId) {
-    const notification = await Notification.findById(notificationId);
-    if (!notification) throw new Error('Notification not found');
+  async deleteNotification(notificationId, userId) {
+    const notification = await Notification.findOne({
+      _id: notificationId,
+      user: userId
+    });
 
-    notification.isRead = true;
-    return await notification.save();
-  }
-
-  async deleteNotification(notificationId) {
-    const notification = await Notification.findById(notificationId);
-    if (!notification) throw new Error('Notification not found');
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
 
     await notification.deleteOne();
-    return notification;
+  }
+
+  async createNotification(userId, data) {
+    const notification = new Notification({
+      user: userId,
+      ...data
+    });
+    return await notification.save();
   }
 }
 

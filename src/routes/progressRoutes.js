@@ -3,18 +3,13 @@ const router = express.Router();
 const progressController = require('../controllers/progressController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-router.get('/', authMiddleware, progressController.getAllProgress);
+// Tüm progress route'ları authentication gerektirir
+router.use(authMiddleware);
 
-router.get('/:courseId', authMiddleware, progressController.getProgress);
-
-router.post('/:courseId/lessons/:lessonId/complete', 
-  authMiddleware, 
-  progressController.markLessonComplete
-);
-
-router.post('/:courseId/lessons/:lessonId/incomplete', 
-  authMiddleware, 
-  progressController.markLessonIncomplete
-);
+// Progress routes
+router.get('/', progressController.getAllProgress);
+router.get('/:courseId', progressController.getProgress);
+router.post('/:courseId/lessons/:lessonId/complete', progressController.markLessonComplete);
+router.post('/:courseId/lessons/:lessonId/incomplete', progressController.markLessonIncomplete);
 
 module.exports = router; 

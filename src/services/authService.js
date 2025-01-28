@@ -9,9 +9,9 @@ class AuthService {
       throw new Error('User not found');
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      throw new Error('Invalid credentials');
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      throw new Error('Invalid password');
     }
 
     const token = jwt.sign(
@@ -31,18 +31,32 @@ class AuthService {
     return user;
   }
 
-  async updateProfile(userId, profileData) {
+  async updateProfile(userId, updateData) {
     const user = await User.findById(userId);
     if (!user) {
       throw new Error('User not found');
     }
 
-    Object.assign(user, profileData);
+    // Email değişikliği varsa, benzersiz olduğunu kontrol et
+    if (updateData.email && updateData.email !== user.email) {
+      const existingUser = await User.findOne({ email: updateData.email });
+      if (existingUser) {
+        throw new Error('Email already in use');
+      }
+    }
+
+    // Şifre güncellenmişse hash'le
+    if (updateData.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(updateData.password, salt);
+    }
+
+    Object.assign(user, updateData);
     await user.save();
 
-    return user;
+    const updatedUser = await User.findById(userId).select('-password');
+    return updatedUser;
   }
 }
-
 
 module.exports = new AuthService();

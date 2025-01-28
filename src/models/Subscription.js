@@ -7,8 +7,10 @@ const subscriptionSchema = new mongoose.Schema({
     value: { type: Number, required: true },
     unit: { type: String, enum: ['day', 'month', 'year'], required: true }
   },
-  features: [String],
-  active: { type: Boolean, default: true }
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  }
 });
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 class UserService {
   async getAllUsers() {
@@ -6,11 +7,28 @@ class UserService {
   }
 
   async createUser(userData) {
-    const userExists = await User.findOne({ email: userData.email });
-    if (userExists) throw new Error('User already exists');
+    const { email, password, name, role } = userData;
 
-    const user = new User(userData);
-    return await user.save();
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role
+    });
+
+    await user.save();
+    return user;
   }
 
   async updateUser(userId, userData) {
@@ -19,12 +37,15 @@ class UserService {
       throw new Error('User not found');
     }
 
-    user.name = userData.name || user.name;
-    user.email = userData.email || user.email;
-    user.password = userData.password || user.password;
-    user.role = userData.role || user.role;
+    // If password is being updated, hash it
+    if (userData.password) {
+      const salt = await bcrypt.genSalt(10);
+      userData.password = await bcrypt.hash(userData.password, salt);
+    }
 
-    return await user.save();
+    Object.assign(user, userData);
+    await user.save();
+    return user;
   }
 
   async deleteUser(userId) {
@@ -32,7 +53,6 @@ class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-
     await user.deleteOne();
     return user;
   }

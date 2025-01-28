@@ -1,4 +1,5 @@
 const Course = require('../models/Course');
+const User = require('../models/User');
 
 class CourseService {
   // Public methods
@@ -15,11 +16,18 @@ class CourseService {
   }
 
   // Student methods
-  async getEnrolledCourses(studentId) {
-    return await Course.find({
-      enrolledStudents: studentId,
-      status: 'published'
-    }).populate('instructor', 'name');
+  async getEnrolledCourses(userId) {
+    const user = await User.findById(userId)
+      .populate({
+        path: 'enrolledCourses',
+        select: 'title description category teacher',
+        populate: {
+          path: 'teacher',
+          select: 'name'
+        }
+      });
+
+    return user.enrolledCourses || [];
   }
 
   async enrollCourse(courseId, studentId) {
