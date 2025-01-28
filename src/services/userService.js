@@ -2,7 +2,7 @@ const User = require('../models/User');
 
 class UserService {
   async getAllUsers() {
-    return await User.find();
+    return await User.find().select('-password');
   }
 
   async createUser(userData) {
