@@ -18,4 +18,7 @@ router.get('/courses', authMiddleware, courseController.getAllCourses);
 // Student routes
 router.get('/enrolled', authMiddleware, courseController.getEnrolledCourses);
 
+// Teacher routes
+router.get('/teaching', authMiddleware, roleMiddleware(['teacher']), courseController.getTeachingCourses);
+
 module.exports = router;

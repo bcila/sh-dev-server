@@ -44,7 +44,9 @@ class CourseService {
 
   // Teacher methods
   async getTeachingCourses(teacherId) {
-    return await Course.find({ instructor: teacherId });
+    return await Course.find({
+      teacher: teacherId
+    }).select('title description category status');
   }
 
   async createCourse(courseData, instructorId) {
