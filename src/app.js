@@ -33,6 +33,7 @@ app.use('/api/notifications', notificationRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  // Can add logging service here
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
