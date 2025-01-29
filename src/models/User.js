@@ -6,6 +6,23 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'trainer', 'student'], default: 'student' },
+  subscription: {
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Subscription'
+    },
+    startDate: Date,
+    endDate: Date,
+    status: {
+      type: String,
+      enum: ['active', 'expired', 'cancelled'],
+      default: 'active'
+    }
+  },
+  notifications: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Notification'
+  }]
 });
 
 userSchema.pre('save', async function (next) {

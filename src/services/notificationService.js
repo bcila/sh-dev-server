@@ -4,22 +4,23 @@ const User = require('../models/User');
 class NotificationService {
   async getUserNotifications(userId) {
     return await Notification.find({ user: userId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(50);
   }
 
   async markAsRead(notificationId, userId) {
-    const notification = await Notification.findOne({
-      _id: notificationId,
-      user: userId
-    });
+    return await Notification.findOneAndUpdate(
+      { _id: notificationId, user: userId },
+      { read: true },
+      { new: true }
+    );
+  }
 
-    if (!notification) {
-      throw new Error('Notification not found');
-    }
-
-    notification.read = true;
-    await notification.save();
-    return notification;
+  async markAllAsRead(userId) {
+    return await Notification.updateMany(
+      { user: userId, read: false },
+      { read: true }
+    );
   }
 
   async deleteNotification(notificationId, userId) {
@@ -41,6 +42,28 @@ class NotificationService {
       ...data
     });
     return await notification.save();
+  }
+
+  // Sistem bildirimleri için yardımcı metodlar
+  async notifyNewCourse(courseId, teacherId) {
+    // Tüm öğrencilere yeni kurs bildirimi gönder
+    const users = await User.find({ role: 'student' });
+    const notifications = users.map(user => ({
+      user: user._id,
+      title: 'New Course Available',
+      message: 'A new course has been added to the platform',
+      type: 'info'
+    }));
+    
+    return await Notification.insertMany(notifications);
+  }
+
+  async notifyLessonComplete(userId, courseId, lessonId) {
+    return await this.createNotification(userId, {
+      title: 'Lesson Completed',
+      message: 'Congratulations on completing the lesson!',
+      type: 'success'
+    });
   }
 }
 

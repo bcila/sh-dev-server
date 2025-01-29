@@ -53,9 +53,42 @@ const markLessonIncomplete = async (req, res) => {
   }
 };
 
+const getStudentStats = async (req, res) => {
+  try {
+    const stats = await progressService.getStudentStats(req.user.id);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getRecentCourses = async (req, res) => {
+  try {
+    const courses = await progressService.getRecentCourses(req.user.id);
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getProgressReport = async (req, res) => {
+  try {
+    const report = await progressService.generateProgressReport(
+      req.user.id,
+      req.params.courseId
+    );
+    res.json(report);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getProgress,
   getAllProgress,
   markLessonComplete,
-  markLessonIncomplete
+  markLessonIncomplete,
+  getStudentStats,
+  getRecentCourses,
+  getProgressReport
 }; 

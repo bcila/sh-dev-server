@@ -1,14 +1,27 @@
 const mongoose = require('mongoose');
 
 const progressSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+    required: true
+  },
   completedLessons: [{
-    lessonId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    completedAt: { type: Date, default: Date.now }
+    type: mongoose.Schema.Types.ObjectId
   }],
-  lastAccessed: { type: Date, default: Date.now },
-  progress: { type: Number, default: 0 }, // Percentage of completion
+  lastAccessed: {
+    type: Date,
+    default: Date.now
+  },
+  progress: {
+    type: Number,
+    default: 0
+  }, // Percentage of completion
   startedAt: { type: Date, default: Date.now }
 });
 

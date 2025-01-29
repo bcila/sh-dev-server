@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const morgan = require('morgan');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -17,19 +18,21 @@ const app = express();
 
 dotenv.config();
 
+// MongoDB Connection
+connectDB();
+
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:5173',
+const corsOptions = {
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
 
-app.use(cookieParser());
+app.use(cors(corsOptions));
 app.use(express.json());
-
-// MongoDB Connection
-connectDB();
+app.use(cookieParser());
+app.use(morgan('dev'));
 
 // Route Middleware
 app.use('/api/auth', authRoutes);
@@ -39,10 +42,18 @@ app.use('/api/admin/subscriptions', subscriptionRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: err.message || 'Something went wrong!' });
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
 });
 
 // 404 handler

@@ -20,7 +20,9 @@ class AuthService {
       { expiresIn: '1d' }
     );
 
-    return { token, user };
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
+    return { token, user: userWithoutPassword };
   }
 
   async getProfile(userId) {
