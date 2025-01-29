@@ -5,12 +5,13 @@ const User = require('./models/User');
 const Subscription = require('./models/Subscription');
 const Course = require('./models/Course');
 const Notification = require('./models/Notification');
+const Progress = require('./models/Progress');
 
 dotenv.config();
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lms');
     console.log('MongoDB connected');
   } catch (error) {
     console.error('MongoDB connection failed:', error);
@@ -23,16 +24,9 @@ const seedData = async () => {
   await Subscription.deleteMany();
   await Course.deleteMany();
   await Notification.deleteMany();
+  await Progress.deleteMany();
 
   const hashedPassword = await bcrypt.hash('password', 10);
-
-  const users = await User.insertMany([
-    { name: 'Admin User', email: 'admin@example.com', password: hashedPassword, role: 'admin' },
-    { name: 'Trainer User', email: 'trainer@example.com', password: hashedPassword, role: 'trainer' },
-    { name: 'Student User', email: 'student@example.com', password: hashedPassword, role: 'student' },
-  ]);
-
-  console.log('Users seeded:', users);
 
   const subscriptions = await Subscription.insertMany([
     { name: 'Basic Plan', price: 10, duration: { value: 1, unit: 'month' }, features: ['Access to basic courses'] },
@@ -41,12 +35,20 @@ const seedData = async () => {
 
   console.log('Subscriptions seeded:', subscriptions);
 
+  const users = await User.insertMany([
+    { name: 'Admin User', email: 'admin@example.com', password: hashedPassword, role: 'admin' },
+    { name: 'Trainer User', email: 'trainer@example.com', password: hashedPassword, role: 'trainer' },
+    { name: 'Student User', email: 'student@example.com', password: hashedPassword, role: 'student', subscription: { plan: subscriptions[0]._id, startDate: new Date(), status: 'active' } },
+  ]);
+
+  console.log('Users seeded:', users);
+
   const courses = await Course.insertMany([
     {
       title: 'Introduction to Programming',
       description: 'Learn the basics of programming.',
       category: 'Programming',
-      instructor: users[1]._id, // Trainer User
+      trainer: users[1]._id, // Trainer User
       lessons: [
         { title: 'Lesson 1', description: 'Introduction', content: 'Content of lesson 1', order: 1 },
         { title: 'Lesson 2', description: 'Variables', content: 'Content of lesson 2', order: 2 },
@@ -56,7 +58,7 @@ const seedData = async () => {
       title: 'Advanced JavaScript',
       description: 'Deep dive into JavaScript.',
       category: 'Programming',
-      instructor: users[1]._id, // Trainer User
+      trainer: users[1]._id, // Trainer User
       lessons: [
         { title: 'Lesson 1', description: 'Closures', content: 'Content of lesson 1', order: 1 },
         { title: 'Lesson 2', description: 'Promises', content: 'Content of lesson 2', order: 2 },
@@ -72,6 +74,21 @@ const seedData = async () => {
   ]);
 
   console.log('Notifications seeded:', notifications);
+
+  const progresses = await Progress.insertMany([
+    {
+      user: users[2]._id, // Student User
+      course: courses[0]._id, // Introduction to Programming
+      completedLessons: [courses[0].lessons[0]._id],
+    },
+    {
+      user: users[2]._id, // Student User
+      course: courses[1]._id, // Advanced JavaScript
+      completedLessons: [],
+    },
+  ]);
+
+  console.log('Progresses seeded:', progresses);
 };
 
 const runSeeder = async () => {
@@ -80,4 +97,4 @@ const runSeeder = async () => {
   mongoose.connection.close();
 };
 
-runSeeder(); 
+runSeeder();
