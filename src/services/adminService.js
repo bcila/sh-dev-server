@@ -83,7 +83,7 @@ class AdminService {
     }
   }
 
-  private async calculateTotalRevenue() {
+  async calculateTotalRevenue() {
     try {
       const subscriptions = await User.find({
         'subscription.status': 'active'

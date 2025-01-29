@@ -58,6 +58,19 @@ class NotificationService {
     return await Notification.insertMany(notifications);
   }
 
+  async notifyNewCourseCreated(courseId, teacherId) {
+    const teacher = await User.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Teacher not found');
+    }
+
+    return await this.createNotification(teacherId, {
+      title: 'New Course Created',
+      message: `Your new course with ID ${courseId} has been successfully created.`,
+      type: 'info'
+    });
+  }
+
   async notifyLessonComplete(userId, courseId, lessonId) {
     return await this.createNotification(userId, {
       title: 'Lesson Completed',
