@@ -180,9 +180,7 @@ const getCourseAnalytics = async (req, res) => {
 // Admin routes
 const getAllCoursesAdmin = async (req, res) => {
   try {
-    const courses = await Course.find()
-      .populate('teacher', 'name email')
-      .populate('lessons');
+    const courses = await Course.find();
     res.json(courses);
   } catch (error) {
     res.status(500).json({ message: error.message });

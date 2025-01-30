@@ -97,6 +97,14 @@ class AdminService {
       throw error;
     }
   }
+
+  async getTeachers() {
+    try {
+      const teacher = await User.find({'role': 'trainer'})
+    } catch (error) {
+      console.error('Error getting teachers:', error);
+    }
+  }
 }
 
 module.exports = new AdminService(); 

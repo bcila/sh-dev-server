@@ -13,6 +13,7 @@ const courseRoutes = require('./routes/courseRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const progressRoutes = require('./routes/progressRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api', courseRoutes);
 app.use('/api/admin/subscriptions', subscriptionRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

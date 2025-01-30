@@ -28,9 +28,9 @@ class ProgressService {
   }
 
   async getAllUserProgress(userId) {
-    return await Progress.find({ user: userId })
-      .populate('course', 'title lessons')
-      .sort({ lastAccessed: -1 });
+    return Progress.find({user: userId})
+        .populate('course', 'title lessons')
+        .sort({lastAccessed: -1});
   }
 
   async getProgress(userId, courseId) {
@@ -97,9 +97,9 @@ class ProgressService {
   }
 
   async getUserCourseProgress(userId) {
-    return await Progress.find({ user: userId })
-      .populate('course', 'title category')
-      .sort({ lastAccessed: -1 });
+    return Progress.find({user: userId})
+        .populate('course', 'title category')
+        .sort({lastAccessed: -1});
   }
 
   async getStudentStats(userId) {

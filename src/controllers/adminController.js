@@ -87,6 +87,14 @@ const deleteSubscription = async (req, res) => {
   }
 };
 
+const getTeachers = async (req, res) => {
+  try {
+    const teachers = await adminService.getTeachers();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 module.exports = {
   getDashboardStats,
   getAllCourses,
@@ -96,5 +104,6 @@ module.exports = {
   getAllSubscriptions,
   createSubscription,
   updateSubscription,
-  deleteSubscription
+  deleteSubscription,
+  getTeachers
 };
