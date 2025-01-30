@@ -25,6 +25,27 @@ class AuthService {
     return { token, user: userWithoutPassword };
   }
 
+  async register(userData) {
+    const { email, password, name, role } = userData;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
+
+    // Create new user
+    const user = new User({
+      name,
+      email,
+      password, // Password is hashing in the model.
+      role
+    });
+
+    await user.save();
+    return user;
+  }
+
   async getProfile(userId) {
     const user = await User.findById(userId).select('-password');
     if (!user) {

@@ -20,29 +20,18 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-    const { email, password, name, role } = userData;
+  const userData = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        throw new Error('User already exists');
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create new user
-    const user = new User({
-        name,
-        email,
-        password: hashedPassword,
-        role
+  try {
+    const user = await authService.register(userData);
+    res.status(201).json({
+      message: 'User registered successfully',
+      user
     });
-
-    await user.save();
-    return user;
-}
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 const getProfile = async (req, res) => {
     try {

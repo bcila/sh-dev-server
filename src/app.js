@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -31,7 +32,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
 
