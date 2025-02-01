@@ -63,15 +63,10 @@ class ProgressService {
       await progress.save();
       
       // Bildirim gönder
-      await notificationService.notifyLessonComplete(userId, courseId, lessonId);
-      
+
       // Kurs tamamlandıysa bildirim gönder
       if (progress.progress === 100) {
-        await notificationService.createNotification(userId, {
-          title: 'Course Completed',
-          message: `Congratulations! You've completed the course: ${course.title}`,
-          type: 'success'
-        });
+        await notificationService.notifyLessonComplete(userId, courseId, lessonId);
       }
     }
     
