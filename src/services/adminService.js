@@ -1,7 +1,5 @@
 const User = require('../models/User');
 const Course = require('../models/Course');
-const Subscription = require('../models/Subscription');
-const Progress = require('../models/Progress');
 
 class AdminService {
   async getDashboardStats() {
@@ -30,58 +28,6 @@ class AdminService {
     }
   }
 
-  async getRecentActivities(limit = 10) {
-    try {
-      // Son kullanıcı kayıtları
-      const recentUsers = await User.find()
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .select('name createdAt')
-        .lean();
-
-      // Son kurs kayıtları
-      const recentCourses = await Course.find()
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .select('title createdAt')
-        .lean();
-
-      // Son abonelikler
-      const recentSubscriptions = await User.find({
-        'subscription.startDate': { $exists: true }
-      })
-        .sort({ 'subscription.startDate': -1 })
-        .limit(limit)
-        .select('name subscription')
-        .lean();
-
-      // Aktiviteleri birleştir ve sırala
-      const activities = [
-        ...recentUsers.map(user => ({
-          type: 'user',
-          description: `New user registered: ${user.name}`,
-          createdAt: user.createdAt
-        })),
-        ...recentCourses.map(course => ({
-          type: 'course',
-          description: `New course created: ${course.title}`,
-          createdAt: course.createdAt
-        })),
-        ...recentSubscriptions.map(sub => ({
-          type: 'subscription',
-          description: `New subscription: ${sub.name}`,
-          createdAt: sub.subscription.startDate
-        }))
-      ];
-
-      return activities
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .slice(0, limit);
-    } catch (error) {
-      console.error('Error getting recent activities:', error);
-      throw error;
-    }
-  }
 
   async calculateTotalRevenue() {
     try {
@@ -97,14 +43,6 @@ class AdminService {
       throw error;
     }
   }
-
-  async getTeachers() {
-    try {
-      const teacher = await User.find({'role': 'trainer'})
-    } catch (error) {
-      console.error('Error getting teachers:', error);
-    }
-  }
 }
 
-module.exports = new AdminService(); 
+module.exports = new AdminService();
