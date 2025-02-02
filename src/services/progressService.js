@@ -61,10 +61,7 @@ class ProgressService {
       progress.progress = Math.round((completedCount / totalLessons) * 100);
       
       await progress.save();
-      
-      // Bildirim gönder
 
-      // Kurs tamamlandıysa bildirim gönder
       if (progress.progress === 100) {
         await notificationService.notifyLessonComplete(userId, courseId, lessonId);
       }

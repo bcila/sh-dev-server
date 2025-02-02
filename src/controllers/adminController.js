@@ -1,4 +1,5 @@
-const adminService = require('../services/adminService');
+const adminService = requ      // Kurs tamamlandıysa bildirim gönder
+ire('../services/adminService');
 
 const getDashboardStats = async (req, res) => {
   try {
